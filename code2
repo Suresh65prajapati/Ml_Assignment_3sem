@@ -1,1 +1,219 @@
-kibbiugoub[9fp
+
+---
+title: "Random forest method for breast_cancer_dataset"
+author: "Lab 7"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r}
+# Install randomForest package if not installed
+#install.packages("randomForest")
+
+
+# Load the library
+library(randomForest)
+library(caret)
+library(dplyr)
+```
+
+
+
+```{r}
+#install.packages("mlbench")
+library(mlbench)
+```
+
+
+
+# To load Breast_cancer_dataset
+
+
+```{r}
+
+setwd("D:\\sandip sir 3rd sem lab")
+data=read.csv("breast_cancer_dataset.csv")
+head(data)
+```
+# To explore the dataset
+
+```{r}
+str(data)
+summary(data)
+```
+
+# data cleaning(Preprocessing)
+
+```{r}
+# To remove the missing value
+data<- na.omit(data)
+head(data)
+```
+
+
+```{r}
+# Convert the target variable (Class) into a factor
+data$target <- factor(data$target)
+```
+
+# To split train and test data
+```{r}
+nrows <- NROW(data)
+set.seed(218)                           ## fix random value
+index <- sample(1:nrows, 0.8 * nrows)   ## shuffle and divide
+index
+#train <- data                          ## 569 test data (100%)
+train <- data[index,]                   ## 455 test data (80%)
+head(train)
+test <- data[-index,]                   ## 114 test data (20%)
+head(test)
+```
+```{r}
+prop.table(table(train$target))
+```
+```{r}
+test$diagnosis
+```
+
+
+
+# Random Forest Model train
+```{r}
+# To training the Random Forest model
+set.seed(218)
+
+# target variable is predicted using all other variables in the dataset.
+
+# data that contains both contains predictor variables and response variable.
+
+# ntree: no. of tree to grow in the forest,if increase it then accuracy is better through it take more computational time.
+
+# mtry: number of predictor variables to consider at each split.usually use square root of the no. of predictors in classification and in regression is set to one-third of the number of predictors.
+
+# importance: compute variable importance measures,if set is true
+
+# proximity: measures how similar observation are based on the classification tree,this is useful for clustering.
+
+model1<-randomForest(target ~.,data=train,ntree=100,mtry=4,importance=TRUE)
+# To view the model summary
+print(model1)
+```
+
+
+
+```{r}
+plot(model1)
+```
+```{r}
+result<- data.frame(test$target,predict(model1,test,type="response"))
+head(result)
+plot(result)
+```
+```{r}
+# Make predictions on test data
+predictions <- predict(model1, newdata = test)
+
+# View predictions
+print(predictions)
+```
+```{r}
+# Create confusion matrix
+confusion_matrix <- table(test$target, predictions)
+
+# Print confusion matrix
+print(confusion_matrix)
+
+# Calculate accuracy
+accuracy <- sum(diag(confusion_matrix)) / sum(confusion_matrix)
+cat("Accuracy:", accuracy)
+```
+
+```{r}
+# Convert the target variable (Class) into a factor
+data$target <- factor(data$target)
+```
+
+
+
+```{r}
+# Random Forest model  creation
+model2 <- randomForest(target~ ., data = train, ntree = 100, mtry = 3)
+
+# Model summary print 
+print(model2)
+
+```
+
+```{r}
+# Check for empty classes
+table(data$target)
+
+
+
+```
+
+```{r}
+train$target <-as.factor(train$target)
+# Fit Random Forest Model again after cleaning data
+model3 <- randomForest(target ~ ., data = train, ntree = 500, mtry = 3)
+
+# Print model summary
+print(model3)
+
+
+```
+
+```{r}
+str(test)
+colnames(test)
+```
+
+
+
+```{r}
+
+train$target <-as.factor(train$target)
+
+# Train the random forest model
+
+learn_rf <- randomForest(target ~ ., data = train, ntree = 500, proximity = TRUE, importance = TRUE)
+
+pre_rf   <- predict(learn_rf, test)
+
+actual_value <-as.factor(test$target)
+cm_rf    <- confusionMatrix(pre_rf, actual_value)
+cm_rf
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
